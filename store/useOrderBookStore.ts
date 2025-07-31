@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { OrderBookSnapshot, SimulatedOrder, Venue } from '@/types';
+import { OrderBookSnapshot, SimulatedOrder } from '@/types';
 import { FillMetrics } from '@/utils/metrics';
 
 interface OrderBookState {

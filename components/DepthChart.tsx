@@ -9,6 +9,7 @@ import {
   Filler,
   Tooltip,
   Legend,
+  ChartData
 } from 'chart.js';
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend);
 
@@ -40,27 +41,28 @@ export default function DepthChart({ venue, symbol }: { venue: Venue; symbol: st
     askPrices.push(price.toFixed(0));
   }
 
-  const data = {
-    labels: [...bidPrices, ...askPrices],
-    datasets: [
-      {
-        label: 'Bids',
-        data: [...bidsCum, ...Array(askPrices.length).fill(null)],
-        borderColor: 'rgb(34,197,94)', // emerald‑500
-        backgroundColor: 'rgba(34,197,94,0.15)',
-        fill: 'origin',
-        tension: 0.3,
-      },
-      {
-        label: 'Asks',
-        data: [...Array(bidPrices.length).fill(null), ...asksCum],
-        borderColor: 'rgb(239,68,68)', // red‑500
-        backgroundColor: 'rgba(239,68,68,0.15)',
-        fill: 'origin',
-        tension: 0.3,
-      },
-    ],
-  } as const;
+  const data: ChartData<'line', (number | null)[], string> = {
+  labels: [...bidPrices, ...askPrices],
+  datasets: [
+    {
+      label: 'Bids',
+      data: [...bidsCum, ...Array(askPrices.length).fill(null)],
+      borderColor: 'rgb(34,197,94)',
+      backgroundColor: 'rgba(34,197,94,0.15)',
+      fill: 'origin',
+      tension: 0.3,
+    },
+    {
+      label: 'Asks',
+      data: [...Array(bidPrices.length).fill(null), ...asksCum],
+      borderColor: 'rgb(239,68,68)',
+      backgroundColor: 'rgba(239,68,68,0.15)',
+      fill: 'origin',
+      tension: 0.3,
+    },
+  ],
+};
+
 
   const textColor = '#e5e7eb'; // gray‑200
   const gridColor = '#374151'; // gray‑700
