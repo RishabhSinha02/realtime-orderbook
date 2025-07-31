@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { OrderBookSnapshot, SimulatedOrder } from '@/types';
-import { FillMetrics } from '@/utils/metrics';
+import { OrderBookSnapshot, SimulatedOrder } from '../types';
+import { FillMetrics } from '../utils/metrics';
 
 interface OrderBookState {
   books: Record<string, Record<string, OrderBookSnapshot>>; // venue → symbol → book

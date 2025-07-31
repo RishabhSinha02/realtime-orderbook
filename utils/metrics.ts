@@ -5,7 +5,7 @@ export interface FillMetrics {
   slippagePct: number; // vs top‑of‑book price
 }
 
-import { OrderBookSnapshot, SimulatedOrder } from '@/types';
+import { OrderBookSnapshot, SimulatedOrder } from '../types';
 
 export function calcFill(order: SimulatedOrder, book: OrderBookSnapshot): FillMetrics {
   const sideLevels = order.side === 'buy' ? book.asks : book.bids; // we hit the opposite side

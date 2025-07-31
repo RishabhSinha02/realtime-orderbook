@@ -2,44 +2,81 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useOrderBookStore } from '@/store/useOrderBookStore';
+import { useOrderBookStore } from '../store/useOrderBookStore';
 import { v4 as uuid } from 'uuid';
-import { OrderSide, OrderType } from '@/types';
-import { Venue } from '@/app/page';
-import { calcFill } from '@/utils/metrics';
+import { OrderSide, OrderType } from '../types';
+import { Venue } from '../app/page';
+import { calcFill } from '../utils/metrics';
 
-const schema = z.object({
-  type: z.enum(['market', 'limit']),
-  side: z.enum(['buy', 'sell']),
-  price: z.string().regex(/^[0-9]+(\.[0-9]+)?$/).optional(),
-  qty: z.string().regex(/^[0-9]+(\.[0-9]+)?$/),
-  delay: z.enum(['0', '5', '10', '30']),
-});
+/* ---------- Zod schema (discriminated union) ---------- */
+const toNum = (v: unknown) => parseFloat(String(v));
+const qty = z.preprocess(toNum, z.number().positive('Qty must be > 0'));
+const price = z.preprocess(toNum, z.number().positive('Price must be > 0'));
 
-type FormValues = z.infer<typeof schema>;
+const schema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('market'),
+    side: z.enum(['buy', 'sell']),
+    qty: z.preprocess(toNum, z.number().positive('Qty must be > 0')),
+    delay: z.enum(['0', '5', '10', '30']),
+    price: z.undefined(),
+  }),
+  z.object({
+    type: z.literal('limit'),
+    side: z.enum(['buy', 'sell']),
+    qty: z.preprocess(toNum, z.number().positive('Qty must be > 0')),
+    delay: z.enum(['0', '5', '10', '30']),
+    price: z.preprocess(toNum, z.number().positive('Price must be > 0')),
+  }),
+]);
+
+type FormValues =
+  | {
+      type: 'market';
+      side: 'buy' | 'sell';
+      qty: unknown;
+      delay: '0' | '5' | '10' | '30';
+      price?: undefined;
+    }
+  | {
+      type: 'limit';
+      side: 'buy' | 'sell';
+      qty: unknown;
+      delay: '0' | '5' | '10' | '30';
+      price: unknown;
+    };
 
 export default function SimulationForm({ venue, symbol }: { venue: Venue; symbol: string }) {
-  // Avoid returning a *new object* from the selector every render – this was
-  // triggering React 18’s “getServerSnapshot should be cached” warning and an
-  // update‑depth loop. Use **separate** selectors instead.
   const books = useOrderBookStore((s) => s.books);
   const addSimulation = useOrderBookStore((s) => s.addSimulation);
 
-const { register, handleSubmit, watch, reset, trigger, formState } =
-  useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { isValid },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    mode: 'onChange',        // ✅ validate on each change
-    defaultValues: { type: 'limit', side: 'buy', delay: '0' } as any,
+    mode: 'onChange',
+    defaultValues: { type: 'market', side: 'buy', delay: '0', qty: 0 } as any,
   });
+
+  const type = watch('type');
 
   const onSubmit = (data: FormValues) => {
     const book = books[venue]?.[symbol];
-    if (!book) {
-      alert('Orderbook not ready – please wait a moment.');
-      return;
-    }
+    if (!book) return alert('Orderbook not ready yet.');
 
-    const topOpposite = data.side === 'buy' ? book.asks[0].price : book.bids[0].price;
+    // Cast qty and price to number after Zod validation
+    const qty = Number((data as any).qty);
+    const price = data.type === 'limit' ? Number((data as any).price) : undefined;
+
+    const marketPrice =
+      data.side === 'buy' ? book.asks[0]?.price : book.bids[0]?.price;
+
+    const priceToUse = data.type === 'market' ? marketPrice : price;
+    if (!priceToUse) return alert('Price unavailable.');
 
     const order = {
       id: uuid(),
@@ -47,39 +84,44 @@ const { register, handleSubmit, watch, reset, trigger, formState } =
       symbol,
       side: data.side as OrderSide,
       type: data.type as OrderType,
-      price: parseFloat(data.price ?? topOpposite.toString()),
-      qty: parseFloat(data.qty),
+      price: priceToUse,
+      qty: qty,
       createdAt: Date.now(),
     } as const;
 
-    const metrics = calcFill(order, book);
+    addSimulation(order, calcFill(order, book));
 
-    const push = () => addSimulation(order, metrics);
-    if (data.delay !== '0') setTimeout(push, +data.delay * 1000);
-    else push();
-    reset();
+    // reset: keep same type/side/delay but clear qty & price
+    reset({ ...data, price: undefined, qty: 0 });
   };
-
-  const type = watch('type');
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+      {/* Order type */}
       <select {...register('type')} className="w-full rounded bg-gray-800 p-2">
         <option value="market">Market</option>
         <option value="limit">Limit</option>
       </select>
 
+      {/* Price field only for limit */}
       {type === 'limit' && (
-        <input {...register('price')} placeholder="Price" className="w-full rounded bg-gray-800 p-2" />
+        <input
+          {...register('price')}
+          placeholder="Limit Price"
+          className="w-full rounded bg-gray-800 p-2"
+        />
       )}
 
+      {/* Quantity */}
       <input {...register('qty')} placeholder="Quantity" className="w-full rounded bg-gray-800 p-2" />
 
+      {/* Side */}
       <select {...register('side')} className="w-full rounded bg-gray-800 p-2">
         <option value="buy">Buy</option>
         <option value="sell">Sell</option>
       </select>
 
+      {/* Delay */}
       <select {...register('delay')} className="w-full rounded bg-gray-800 p-2">
         <option value="0">Immediate</option>
         <option value="5">5 s delay</option>
@@ -90,35 +132,10 @@ const { register, handleSubmit, watch, reset, trigger, formState } =
       <button
         type="submit"
         className="w-full rounded bg-blue-600 p-2 disabled:opacity-50"
-        disabled={!formState.isValid}
+        disabled={!isValid}
       >
         Simulate Order
       </button>
     </form>
   );
 }
-
-//       <input {...register('qty')} placeholder="Quantity" className="w-full rounded bg-gray-800 p-2" />
-
-//       <select {...register('side')} className="w-full rounded bg-gray-800 p-2">
-//         <option value="buy">Buy</option>
-//         <option value="sell">Sell</option>
-//       </select>
-
-//       <select {...register('delay')} className="w-full rounded bg-gray-800 p-2">
-//         <option value="0">Immediate</option>
-//         <option value="5">5 s delay</option>
-//         <option value="10">10 s delay</option>
-//         <option value="30">30 s delay</option>
-//       </select>
-
-//       <button
-//         type="submit"
-//         className="w-full rounded bg-blue-600 p-2 disabled:opacity-50"
-//         disabled={!formState.isValid}
-//       >
-//         Simulate Order
-//       </button>
-//     </form>
-//   );
-// }
