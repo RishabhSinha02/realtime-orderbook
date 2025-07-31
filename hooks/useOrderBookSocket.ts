@@ -1,6 +1,3 @@
-/* -----------------------------------------------
- * useOrderBookSocket.ts
- * --------------------------------------------- */
 import { useEffect, useRef } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useOrderBookStore } from '@/store/useOrderBookStore';

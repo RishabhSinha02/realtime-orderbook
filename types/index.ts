@@ -4,9 +4,9 @@ export interface BookLevel {
 }
 
 export interface OrderBookSnapshot {
-  bids: BookLevel[]; // length N
-  asks: BookLevel[]; // length N
-  ts: number; // epoch ms
+  bids: BookLevel[]; 
+  asks: BookLevel[]; 
+  ts: number;
 }
 
 export type OrderSide = 'buy' | 'sell';
@@ -18,7 +18,7 @@ export interface SimulatedOrder {
   symbol: string;
   side: OrderSide;
   type: OrderType;
-  price: number; // limit only
+  price: number;
   qty: number;
   createdAt: number;
 }
