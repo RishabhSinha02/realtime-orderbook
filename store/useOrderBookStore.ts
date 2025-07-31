@@ -1,18 +1,21 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { OrderBookSnapshot, SimulatedOrder, Venue } from '@/types';
+import { FillMetrics } from '@/utils/metrics';
 
 interface OrderBookState {
   books: Record<string, Record<string, OrderBookSnapshot>>; // venue → symbol → book
   simulations: SimulatedOrder[];
+  lastMetrics?: FillMetrics;
   setBook: (venue: string, symbol: string, data: OrderBookSnapshot) => void;
-  addSimulation: (order: SimulatedOrder) => void;
+  addSimulation: (order: SimulatedOrder, metrics: FillMetrics) => void;
 }
 
 export const useOrderBookStore = create<OrderBookState>()(
   devtools((set) => ({
     books: {},
     simulations: [],
+    lastMetrics: undefined,
     setBook: (venue, symbol, data) =>
       set((s) => ({
         books: {
@@ -20,6 +23,7 @@ export const useOrderBookStore = create<OrderBookState>()(
           [venue]: { ...(s.books[venue] || {}), [symbol]: data },
         },
       })),
-    addSimulation: (order) => set((s) => ({ simulations: [...s.simulations, order] })),
+    addSimulation: (order, metrics) =>
+      set((s) => ({ simulations: [...s.simulations, order], lastMetrics: metrics })),
   }))
 );
