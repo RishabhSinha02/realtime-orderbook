@@ -72,7 +72,17 @@ export default function DepthChart({ venue, symbol }: { venue: Venue; symbol: st
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        labels: { color: textColor },
+        display: true, // <-- Enable ChartJS legend
+        labels: {
+          color: textColor,
+          font: { size: 14, weight: 'bold' },
+          usePointStyle: true,
+          padding: 20,
+          boxWidth: 16,
+          boxHeight: 16,
+        },
+        position: 'top' as const,
+        align: 'center' as const,
       },
       tooltip: {
         mode: 'index' as const,
@@ -92,12 +102,27 @@ export default function DepthChart({ venue, symbol }: { venue: Venue; symbol: st
   } as const;
 
   return (
-    <div className="relative h-64 w-full bg-gray-900 rounded">
-      <Line data={data} options={options} />
+    <div className="relative h-80 w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 rounded-xl shadow-xl p-4 flex flex-col justify-end border border-gray-800/50 pb-12 pt-2">
+      <Line data={data} options={{
+        ...options,
+        plugins: {
+          ...options.plugins,
+          legend: {
+            ...options.plugins.legend,
+            labels: {
+              ...options.plugins.legend.labels,
+              padding: 8, // Reduce legend label padding
+            },
+          },
+        },
+      }} />
       {sim && (
-        <p className="absolute inset-x-0 bottom-1 text-center text-xs text-gray-300">
-          Simulated {sim.side} @ {sim.type === 'limit' ? sim.price : 'MKT'} qty {sim.qty}
-        </p>
+        <div className="absolute inset-x-0 bottom-3 text-center z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-900/60 text-blue-300 font-mono text-xs backdrop-blur-sm border border-blue-500/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span>
+            Simulated {sim.side} @ {sim.type === 'limit' ? sim.price : 'MKT'} qty {sim.qty}
+          </div>
+        </div>
       )}
     </div>
   );

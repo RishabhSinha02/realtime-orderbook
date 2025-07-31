@@ -48,6 +48,7 @@ export function useOrderBookSocket(
         };
       case 'Bybit': {
         const depthTag = 50;
+        // Bybit uses symbols without hyphens (e.g., BTCUSDT instead of BTC-USDT)
         const bybitSymbol = symbol.replace('-', '').toUpperCase();
         return {
           url: 'wss://stream.bybit.com/v5/public/linear',
@@ -58,12 +59,9 @@ export function useOrderBookSocket(
         };
       }
       case 'Deribit': {
-        const map: Record<string, string> = {
-          'BTC-USDT': 'BTC-PERPETUAL',
-          'ETH-USDT': 'ETH-PERPETUAL',
-        };
-        const inst = map[symbol] ?? symbol;
         const depthTag = 20;
+        // Deribit uses PERPETUAL format (e.g., BTC-PERPETUAL)
+        // The symbol dropdown already provides the correct format
         return {
           url: 'wss://www.deribit.com/ws/api/v2',
           subMsg: {
@@ -71,7 +69,7 @@ export function useOrderBookSocket(
             id: 42,
             method: 'public/subscribe',
             params: {
-              channels: [`book.${inst}.none.${depthTag}.100ms`],
+              channels: [`book.${symbol}.none.${depthTag}.100ms`],
             },
           },
         };

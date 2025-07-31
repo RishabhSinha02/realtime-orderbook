@@ -96,42 +96,61 @@ export default function SimulationForm({ venue, symbol }: { venue: Venue; symbol
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Order type */}
-      <select {...register('type')} className="w-full rounded bg-gray-800 p-2">
-        <option value="market">Market</option>
-        <option value="limit">Limit</option>
-      </select>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-300">Order Type</label>
+        <select {...register('type')} className="w-full rounded-lg bg-gray-800/60 p-3 text-base focus:ring-2 focus:ring-blue-500 transition border border-gray-700/50">
+          <option value="market">Market Order</option>
+          <option value="limit">Limit Order</option>
+        </select>
+      </div>
 
       {/* Price field only for limit */}
       {type === 'limit' && (
-        <input
-          {...register('price')}
-          placeholder="Limit Price"
-          className="w-full rounded bg-gray-800 p-2"
-        />
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-300">Limit Price</label>
+          <input
+            {...register('price')}
+            placeholder="Enter limit price"
+            className="w-full rounded-lg bg-gray-800/60 p-3 text-base focus:ring-2 focus:ring-blue-500 transition border border-gray-700/50"
+          />
+        </div>
       )}
 
       {/* Quantity */}
-      <input {...register('qty')} placeholder="Quantity" className="w-full rounded bg-gray-800 p-2" />
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-300">Quantity</label>
+        <input 
+          {...register('qty')} 
+          placeholder="Enter quantity" 
+          className="w-full rounded-lg bg-gray-800/60 p-3 text-base focus:ring-2 focus:ring-blue-500 transition border border-gray-700/50" 
+        />
+      </div>
 
       {/* Side */}
-      <select {...register('side')} className="w-full rounded bg-gray-800 p-2">
-        <option value="buy">Buy</option>
-        <option value="sell">Sell</option>
-      </select>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-300">Side</label>
+        <select {...register('side')} className="w-full rounded-lg bg-gray-800/60 p-3 text-base focus:ring-2 focus:ring-blue-500 transition border border-gray-700/50">
+          <option value="buy">Buy</option>
+          <option value="sell">Sell</option>
+        </select>
+      </div>
 
       {/* Delay */}
-      <select {...register('delay')} className="w-full rounded bg-gray-800 p-2">
-        <option value="0">Immediate</option>
-        <option value="5">5 s delay</option>
-        <option value="10">10 s delay</option>
-        <option value="30">30 s delay</option>
-      </select>
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-300">Timing</label>
+        <select {...register('delay')} className="w-full rounded-lg bg-gray-800/60 p-3 text-base focus:ring-2 focus:ring-blue-500 transition border border-gray-700/50">
+          <option value="0">Immediate</option>
+          <option value="5">5 seconds delay</option>
+          <option value="10">10 seconds delay</option>
+          <option value="30">30 seconds delay</option>
+        </select>
+      </div>
 
       <button
         type="submit"
-        className="w-full rounded bg-blue-600 p-2 disabled:opacity-50"
+        className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 p-4 font-semibold text-lg shadow-lg hover:from-blue-700 hover:to-blue-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
         disabled={!isValid}
       >
         Simulate Order
