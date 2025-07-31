@@ -1,0 +1,20 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#1f2937" rx="4"/>
+  
+  <!-- Bid side (green bars) -->
+  <rect x="4" y="8" width="2" height="8" fill="#10b981" rx="1"/>
+  <rect x="7" y="10" width="2" height="6" fill="#10b981" rx="1"/>
+  <rect x="10" y="12" width="2" height="4" fill="#10b981" rx="1"/>
+  
+  <!-- Ask side (red bars) -->
+  <rect x="26" y="16" width="2" height="8" fill="#ef4444" rx="1"/>
+  <rect x="23" y="18" width="2" height="6" fill="#ef4444" rx="1"/>
+  <rect x="20" y="20" width="2" height="4" fill="#ef4444" rx="1"/>
+  
+  <!-- Center line -->
+  <line x1="16" y1="4" x2="16" y2="28" stroke="#6b7280" stroke-width="1"/>
+  
+  <!-- Center dot -->
+  <circle cx="16" cy="16" r="2" fill="#3b82f6"/>
+</svg> 

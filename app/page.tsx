@@ -9,6 +9,30 @@ import { FaExchangeAlt, FaChartBar, FaClipboardList, FaBitcoin, FaGlobe } from '
 const VENUES = ['OKX', 'Bybit', 'Deribit'] as const;
 export type Venue = (typeof VENUES)[number];
 
+// Orderbook Logo Component
+const OrderbookLogo = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Background */}
+    <rect width="32" height="32" fill="#1f2937" rx="4"/>
+    
+    {/* Bid side (green bars) */}
+    <rect x="4" y="8" width="2" height="8" fill="#10b981" rx="1"/>
+    <rect x="7" y="10" width="2" height="6" fill="#10b981" rx="1"/>
+    <rect x="10" y="12" width="2" height="4" fill="#10b981" rx="1"/>
+    
+    {/* Ask side (red bars) */}
+    <rect x="26" y="16" width="2" height="8" fill="#ef4444" rx="1"/>
+    <rect x="23" y="18" width="2" height="6" fill="#ef4444" rx="1"/>
+    <rect x="20" y="20" width="2" height="4" fill="#ef4444" rx="1"/>
+    
+    {/* Center line */}
+    <line x1="16" y1="4" x2="16" y2="28" stroke="#6b7280" strokeWidth="1"/>
+    
+    {/* Center dot */}
+    <circle cx="16" cy="16" r="2" fill="#3b82f6"/>
+  </svg>
+);
+
 // Available symbols for each venue
 const VENUE_SYMBOLS: Record<Venue, string[]> = {
   'OKX': [
@@ -74,7 +98,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <FaBitcoin className="text-orange-500 text-2xl" />
+              <OrderbookLogo size={32} />
               <h1 className="text-xl font-bold text-white">Real-Time Orderbook</h1>
             </div>
           </div>
